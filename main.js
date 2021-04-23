@@ -12,7 +12,7 @@ class Graph{
         for(const edge of vr){
             const v1 = v.indexOf(edge[0]); // from vertex1 to vertex2
             const v2 = v.indexOf(edge[1]); // v1 is the index of vertex1, v2 is the index of vertex2
-            vexs[v1].edge.push(v2);
+            vexs[v1].edge.push(vexs[v2]); // a better way is to add the vertex object to it
             vexs[v2].in++;
         }
         this.adjmatrix = vexs;
@@ -24,8 +24,7 @@ const findNewVertexOfIndegreeZero = (G)=>{
     const vexNumber = G.adjmatrix.length;
     for(let i = 0; i < vexNumber; i++){
         if(G.adjmatrix[i]&&G.adjmatrix[i].in===0){ // some vertex has been deleted
-            zeroInVertex = JSON.parse(JSON.stringify(G.adjmatrix[i])); // copy this vertex instance
-            G.adjmatrix[i] = null; // delete this vertex
+            zeroInVertex = G.adjmatrix[i]; // copy this vertex instance
             break;
         }
     }
@@ -35,22 +34,21 @@ const findNewVertexOfIndegreeZero = (G)=>{
 const topsort = (G)=>{
     const n = G.adjmatrix.length; // number of vertex
     const sortArray = []; 
-    // for(let i = 0; i < n; i++){
-    //     const v = findNewVertexOfIndegreeZero(G); // return the vertex
-    //     if(v==null)
-    //         throw Error("there's a cycle in the graph!");   
-    //     sortArray.push(v.data);
-    //     // delete this vertex
-    //     for(const adjacentVInd of v.edge){ // adjacentV is the index in adjmatrix
-    //         if(G.adjmatrix[adjacentVInd]){// some have been deleted to null
-    //             G.adjmatrix[adjacentVInd].in--;
-    //         } 
-    //     }
-    // }
-    const queue = []; // a queue to store the zeroIndegree vertexs
-    const v = findNewVertexOfIndegreeZero(G); // return the vertex
-    queue.push(v);
-    
+    const queue = []; // a queue to store all the vertex that indegree is 0
+    for(vertex of G.adjmatrix){
+        if(vertex.in===0)
+            queue.push(vertex);
+    }
+    while(queue.length){
+        const curVertex = queue.shift();
+        sortArray.push(curVertex.data);
+        for(const adjacentV of curVertex.edge){ // adjacentV is the vertex object
+            // console.log(adjacentV);
+                adjacentV.in--;
+                if(adjacentV.in===0)
+                    queue.push(adjacentV);
+        }
+    }
     return sortArray;
 }
 
