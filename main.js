@@ -1,28 +1,60 @@
-const values = [1,2,3,4,5,6,7];
-// egdes: vex1, vex2, distance
-const edges = [[1,2,2],[1,4,1],[2,4,3],[2,5,10],[3,1,4],[3,6,5],[4,3,2],[4,5,2],[4,6,8],[4,7,4],[5,7,6],[7,6,1]];
-const n = values.length;
-const adjmatrix = new Array(n + 1);// from 1 to n
-for(let i = 0; i < n + 1; i++){
-    adjmatrix[i] = new Array(n + 1).fill(Number.MAX_SAFE_INTEGER); // all edge dist init to infinite
-    adjmatrix[i][i] = 0;
-}
-for(const edge of edges){
-    adjmatrix[edge[0]][edge[1]] = edge[2];
-}
-const distance = JSON.parse(JSON.stringify(adjmatrix)); // deep copy the adjmatrix
-const path = new Array(n + 1);
-for(let i = 0; i < n + 1; i++){
-    path[i] = new Array(n + 1).fill(-1);// all path are initialized to have no vertex
-}
-for(let k = 1; k <= n; k++){ // for each vertex, whether it can connected the other two vertexs
-    for(let i  = 1; i <= n; i++){ 
-        for(let j = 1; j <= n; j++){
-            if(distance[i][j] > distance[i][k] + distance[k][j]){ // use k to connect i and j is shorter
-                distance[i][j] = distance[i][k] + distance[k][j];
-                path[i][j] = k;
+var solveSudoku = function(board) {
+    const rowRecord = new Array(9).fill(null).map((ele)=> new Array(9).fill(false));
+    const colRecord = new Array(9).fill(null).map((ele)=> new Array(9).fill(false));
+    const block = new Array(9).fill(null).map((ele)=> new Array(9).fill(false));
+    const spaces = []; // record the position of spaces
+
+    for(let i = 0; i < 9; i++){
+        for(let j = 0; j < 9; j++){
+            if(board[i][j]=='.')
+                spaces.push([i, j]);
+            else{
+                const value = parseInt(board[i][j]);
+                rowRecord[i][value - 1] = true;
+                colRecord[j][value - 1] = true;
+                block[Math.floor(i / 3) * 3 + Math.floor(j / 3)][value - 1] = true;
             }
         }
     }
-}
-console.log(distance[1][7]," ",path[1][7]);
+    const dfs = function(index){
+        if(index < spaces.length){
+            const x = spaces[index][0];
+            const y = spaces[index][1];
+            for(k = 1; k <= 9; k++){
+                // console.log(rowRecord[x][k - 1]);
+                // console.log(colRecord[y][k - 1]);
+                // console.log(block[Math.floor(x / 3) * 3 + Math.floor(y / 3)][k - 1]);
+                if(rowRecord[x][k - 1]==false && colRecord[y][k - 1]==false && block[Math.floor(x / 3) * 3 + Math.floor(y / 3)][k - 1]==false){
+                    // fill in with k
+                    rowRecord[x][k - 1]=true;
+                    colRecord[y][k - 1]=true;
+                    block[Math.floor(x / 3) * 3 + Math.floor(y / 3)][k - 1]=true;
+                    console.log("x, k-1", x, k - 1);
+                    console.log("y", y);
+                    console.log("block Num",Math.floor(x / 3) * 3 + Math.floor(y / 3));
+                    board[x][y] = String.fromCharCode('0'.charCodeAt() + k);
+                    const result = dfs(index + 1);
+                    if(result){ // can fill this
+                        console.log("here");
+                        return true;
+                    }else{
+                        // trace-back
+                        rowRecord[x][k - 1]=false;
+                        colRecord[y][k - 1]=false;
+                        block[Math.floor(x / 3) * 3 + Math.floor(y / 3)][k - 1]=false;
+                        board[x][y] = '.';
+                    }
+                }
+            }
+            // all of above cannot return
+            return false;
+        }else{
+            return true; // done!
+        }
+    }
+    dfs(0);
+    return board;
+};
+const board = [["5","3",".",".","7",".",".",".","."],["6",".",".","1","9","5",".",".","."],[".","9","8",".",".",".",".","6","."],["8",".",".",".","6",".",".",".","3"],["4",".",".","8",".","3",".",".","1"],["7",".",".",".","2",".",".",".","6"],[".","6",".",".",".",".","2","8","."],[".",".",".","4","1","9",".",".","5"],[".",".",".",".","8",".",".","7","9"]];
+const answer = solveSudoku(board);
+console.log(answer);
