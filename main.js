@@ -1,37 +1,45 @@
-var permutation = function(s) {
-    const letterArray = s.split("");
-    letterArray.sort((a, b)=> a.charCodeAt() - b.charCodeAt()); // sort it
-    console.log(letterArray);
-    const n = letterArray.length;
-    const vis = new Array(n).fill(false);
-    const arrayResult = [];
-    const dfs = function(path){
-        // end point
-        if(path.length==n){
-            arrayResult.push([...path]);
-            return;
-        }
-        for(let i = 0 ; i < n; i++){
-            if(i > 0 && letterArray[i]==letterArray[i - 1] && vis[i-1]==false) // duplicate letters must be accessed by orders
-                continue;
-            if(!vis[i]){ // have not been used
-                path.push(letterArray[i]);
-                vis[i] = true;
-                dfs(path);
-                // back trace
-                path.pop();
-                vis[i] = false;
+var minSwaps = function(s) {
+    const sArray = s.split("");
+    const n = sArray.length;
+    let result;
+    const swap = function(n, prev, sArray){ // prev is '0' or '1'
+        let left=0;
+        let swapCount = 0;
+        while(left < n){
+            let current = prev=='1' ? '0' : '1';
+            if(sArray[left]!=current){
+                let right = left + 1;
+                while(sArray[right]!=current){
+                    right += 2;
+                }
+                [sArray[left], sArray[right]] = [sArray[right], sArray[left]];
+                swapCount++;
             }
+            prev = sArray[left];
+            left++;
         }
+        return swapCount;
     }
-    const path = [];
-    dfs(path);
-    const result = arrayResult.map((ele)=>ele.join(""));
-    // // remove duplicate
-    // const hshmap = new Map();
-    // for(const str of result){
-
-    // }
+    // analyse the numbers of 0 and 1
+    let countOne = 0;
+    let countZero = 0;
+    for(const snum of sArray){
+        if(snum=='0')
+            countZero++;
+        else
+            countOne++;
+    }
+    if((n%2==1)&&((countZero==(n>>1))||(countOne==(n>>1)))){
+        if(countZero==(n>>1)){ // one be the first
+            result = swap(n, '0', [...sArray]);
+        }else{
+            result = swap(n, '1', [...sArray]);
+        }    
+    }else if(n%2==0&&countZero==(n>>1)){
+        result = Math.min(swap(n, '0', [...sArray]), swap(n, '1', [...sArray]));
+    }else{
+        return -1;
+    }
     return result;
 };
-console.log(permutation("suvyls"));
+console.log(minSwaps("01"));
