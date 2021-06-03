@@ -1,21 +1,18 @@
-var minSpeedOnTime = function(dist, hour) {
-    let time = Number.MAX_SAFE_INTEGER;
-    let speed = 1;
-    if(hour < dist.length - 1)
-        return -1;
-    while(time > hour){
-        time = 0;
-        dist.forEach((distance, index)=>{
-            if(index < dist.length - 1){
-                if(distance < speed)
-                    time++;
-                else
-                    time += Math.ceil(distance / speed);    
+var search = function(nums, target) {
+    const n = nums.length;
+    let left = 0, right = n -1;
+    while(left < right){
+        let middle = left + ((right - left) >> 1);
+        if(nums[middle]===target)
+            return middle;
+        if(nums[0] < nums[middle]){ // the left part is in order
+            if(nums[middle] < target){
+                left = middle + 1;
             }else{
-                time += distance / speed;  
+                right = middle;
             }
-        })
-        speed++;
+        }else if(nums[middle] < nums[n - 1]){// the right part is in order
+            if()
+        }
     }
-    return speed - 1; // under what circumtances will not find the speed
 };
