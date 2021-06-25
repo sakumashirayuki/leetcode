@@ -1,4 +1,5 @@
 var maxPoints = function(points) {
+    const maxInt = 0xffffff;
     const n = points.length;
     let ans = 1;
     for(let i = 0; i < n; i++){
@@ -20,7 +21,7 @@ var maxPoints = function(points) {
                     count = Math.max(count, prevCount + 1);
                 }
             }else{// x1: point1[0], y1: point1[1], x2: point2[0], y2: point2[1]
-                const k = (point2[1] - point1[1]) / (point2[0] - point1[0]);
+                const k = ((point2[1] - point1[1]) % maxInt * maxInt) / (point2[0] - point1[0]);
                 const b = point2[1] - k * point2[0];
                 if(!hashmap.has(`${k},${b}`)){
                     hashmap.set(`${k},${b}`, 2);
