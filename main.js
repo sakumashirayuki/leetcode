@@ -1,59 +1,49 @@
-var isScramble = function(s1, s2) {
-    const length = s1.length;
-    memo = new Array(length).fill(0).map(() => new Array(length).fill(0).map(() => new Array(length + 1).fill(0)));
-    return dfs(0, 0, length, s1, s2, memo);
-};
-
-const dfs = function(i1, i2, length, s1, s2, memo) {
-    if (memo[i1][i2][length] !== 0) {
-        return memo[i1][i2][length] === 1;
+const getEmpty = (o) => {
+    if(Object.prototype.toString.call(o) == '[Object Object]')
+        return {};
+    if(Object.prototype.toString.call(o) == '[Object Array]')
+        return [];
+    return o;
+}
+const deepCopy = (origin) => {
+    const target = getEmpty(origin);
+    const stack = [];//[target, origin]
+    const map = new Map(); // key: origin, value: target
+    if(target!=origin){
+        stack.push([target, origin]);
+        map.set(origin, target);
     }
-
-    // 判断两个子串是否相等
-    if (s1.slice(i1, i1 + length) === s2.slice(i2, i2 + length)) {
-        memo[i1][i2][length] = 1;
-        return true;
-    }
-
-    // 判断是否存在字符 c 在两个子串中出现的次数不同
-    if (!checkIfSimilar(i1, i2, length, s1, s2)) {
-        memo[i1][i2][length] = -1;
-        return false;
-    }
-
-    // 枚举分割位置
-    for (let i = 1; i < length; ++i) {
-        // 不交换的情况
-        if (dfs(i1, i2, i, s1, s2, memo) && dfs(i1 + i, i2 + i, length - i, s1, s2, memo)) {
-            memo[i1][i2][length] = 1;
-            return true;
-        }
-        // 交换的情况
-        if (dfs(i1, i2 + length - i, i, s1, s2, memo) && dfs(i1 + i, i2, length - i, s1, s2, memo)) {
-            memo[i1][i2][length] = 1;
-            return true;
+    while(stack.length){
+        const [t, o] = stack.pop();
+        for(const key in o){
+            if(map.has(key)){
+                t[key] = map.get(key);
+            }else{
+                t[key] = getEmpty(o[key]);
+                if(t[key]!=o[key]){
+                    stack.push([t[key], o[key]]);
+                    map.set(o[key], t[key])
+                }
+            }
         }
     }
-
-    memo[i1][i2][length] = -1;
-    return false;
+    return target
 }
 
-const checkIfSimilar = function(i1, i2, length, s1, s2) {
-    const freq = new Map();
-    for (let i = i1; i < i1 + length; ++i) {
-        const c = s1[i];
-        freq.set(c, (freq.get(c) || 0) + 1);
-    }
-    for (let i = i2; i < i2 + length; ++i) {
-        const c = s2[i];
-        freq.set(c, (freq.get(c) || 0) - 1);
-    }
-    for (const value of freq.values()) {
-        if (value !== 0) {
-            return false;
-        }
-    }
-    return true;
-}
-console.log(isScramble("acddaaaadbcbdcdaccabdbadccaaa", "adcbacccabbaaddadcdaabddccaaa"));
+console.log(deepCopy({a:1}));
+console.log(deepCopy([1,2,{a:[3,4]}]))
+console.log(deepCopy(function(){return 1;}))
+console.log(deepCopy({
+    x:function(){
+        return "x";
+    },
+    val:3,
+    arr: [
+        1,
+        {test:1}
+    ]
+}))
+
+let circle = {};
+circle.child = circle;
+console.log(deepCopy(circle));
